@@ -8,10 +8,19 @@ import { RolesModule } from './roles/roles.module';
 import { Role } from './roles/roles.model';
 import { UserRoles } from './roles/user-roles.model';
 import { AuthModule } from './auth/auth.module';
+import { ErrorHandlerService } from './error-handler/error-handler.service';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './http-exception/http-exception.filter';
 
 @Module({
   controllers: [],
-  providers: [],
+  providers: [
+    ErrorHandlerService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
   imports: [
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,

@@ -1,35 +1,50 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserService } from '../users/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../users/users.model';
+import { ErrorHandlerService } from '../error-handler/error-handler.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private errorHandler: ErrorHandlerService,
   ) {}
 
   async login(userDto: CreateUserDto) {
+    this.errorHandler.clearErrors();
+    if (!userDto.email) {
+      this.errorHandler.addFieldError('email', 'Не указан Email');
+      this.errorHandler.throwError(HttpStatus.BAD_REQUEST);
+    }
     const user = await this.validateUser(userDto);
     return this.generateToken(user);
   }
 
   async registration(userDto: CreateUserDto) {
+    this.errorHandler.clearErrors();
+
+    if (!userDto.email) {
+      this.errorHandler.addFieldError('email', 'Email is required');
+    }
+
+    if (!userDto.password) {
+      this.errorHandler.addFieldError('password', 'Password is required');
+    }
+
+    if (this.errorHandler.getErrors().fieldErrors.length > 0) {
+      console.log(1);
+      this.errorHandler.throwError(HttpStatus.BAD_REQUEST);
+    }
+
     const candidate = await this.userService.getUserByEmail(userDto.email);
 
     if (candidate) {
-      throw new HttpException(
-        'Пользователь с таким email существует',
-        HttpStatus.BAD_REQUEST,
-      );
+      this.errorHandler.setCommonError('Пользователь с таким email существует');
+      this.errorHandler.throwError(HttpStatus.BAD_REQUEST);
     }
 
     const hashPassword = await bcrypt.hash(userDto.password, 5);
@@ -56,11 +71,16 @@ export class AuthService {
       user.password,
     );
 
+    if (!passwordEquals) {
+      this.errorHandler.addFieldError('password', 'Пароль не верный');
+    }
+
+    if (this.errorHandler.getErrors().fieldErrors.length > 0) {
+      this.errorHandler.throwError(HttpStatus.UNAUTHORIZED);
+    }
+
     if (user && passwordEquals) {
       return user;
     }
-    throw new UnauthorizedException({
-      message: 'Не корректный email или пароль',
-    });
   }
 }
