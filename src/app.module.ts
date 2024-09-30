@@ -20,6 +20,10 @@ import { HttpExceptionFilter } from './http-exception/http-exception.filter';
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
   ],
   imports: [
     ConfigModule.forRoot({
