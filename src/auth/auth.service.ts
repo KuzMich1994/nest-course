@@ -17,7 +17,7 @@ export class AuthService {
   async login(userDto: CreateUserDto) {
     this.errorHandler.clearErrors();
     if (!userDto.email) {
-      this.errorHandler.addFieldError('email', 'Не указан Email');
+      this.errorHandler.addFieldError('email', ['Не указан Email']);
       this.errorHandler.throwError(HttpStatus.BAD_REQUEST);
     }
     const user = await this.validateUser(userDto);
@@ -28,15 +28,14 @@ export class AuthService {
     this.errorHandler.clearErrors();
 
     if (!userDto.email) {
-      this.errorHandler.addFieldError('email', 'Email is required');
+      this.errorHandler.addFieldError('email', ['Обязательное поле']);
     }
 
     if (!userDto.password) {
-      this.errorHandler.addFieldError('password', 'Password is required');
+      this.errorHandler.addFieldError('password', ['Обязательное поле']);
     }
 
     if (this.errorHandler.getErrors().fieldErrors.length > 0) {
-      console.log(1);
       this.errorHandler.throwError(HttpStatus.BAD_REQUEST);
     }
 
@@ -68,9 +67,11 @@ export class AuthService {
     const user = await this.userService.getUserByEmail(userDto.email);
 
     if (!user) {
-      this.errorHandler.addFieldError('email', 'Пользователь не найден.');
+      this.errorHandler.addFieldError('email', ['Пользователь не найден.']);
       this.errorHandler.throwError(HttpStatus.NOT_FOUND);
     }
+
+    console.log(userDto);
 
     const passwordEquals = await bcrypt.compare(
       userDto.password,
@@ -78,7 +79,7 @@ export class AuthService {
     );
 
     if (!passwordEquals) {
-      this.errorHandler.addFieldError('password', 'Пароль не верный');
+      this.errorHandler.addFieldError('password', ['Пароль не верный']);
     }
 
     if (this.errorHandler.getErrors().fieldErrors.length > 0) {

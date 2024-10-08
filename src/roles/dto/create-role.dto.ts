@@ -1,4 +1,6 @@
+import { UserRole } from '../consts/consts';
+
 export class CreateRoleDto {
-  readonly value: string;
+  readonly value: UserRole;
   readonly description: string;
 }

@@ -8,8 +8,8 @@ export class ErrorHandlerService {
   private fieldErrors: FieldError[] = [];
   private commonError: string;
 
-  public addFieldError(field: string, message: string): void {
-    this.fieldErrors.push(new FieldError({ [field]: message }));
+  public addFieldError(field: string, messages: string[]): void {
+    this.fieldErrors.push(new FieldError({ [field]: messages }));
   }
 
   public setCommonError(message: string): void {

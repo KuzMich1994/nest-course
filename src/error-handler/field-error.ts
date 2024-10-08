@@ -1,3 +1,3 @@
 export class FieldError {
-  constructor(public errors: Record<string, string>) {}
+  constructor(public errors: Record<string, string[]>) {}
 }

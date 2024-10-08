@@ -3,16 +3,15 @@ import { CustomHttpException } from './custom-http-exception';
 
 @Catch(HttpException)
 export class HttpExceptionFilter extends CustomHttpException {
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: CustomHttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const status = exception.getStatus();
     let errors: Record<string, string> = {};
 
     const responseBody = exception.getResponse();
-    console.log(responseBody);
+
     responseBody['errors']?.forEach((error) => {
-      console.log(error);
       errors = { ...errors, ...error?.errors };
     });
     response.status(status).json({
